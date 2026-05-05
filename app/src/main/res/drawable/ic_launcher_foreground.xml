@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Circular base (Green accent) -->
+    <path
+        android:fillColor="#22C55E"
+        android:pathData="M54,10A44,44 0 1,1 53.9,10Z" />
+
+    <!-- Music note -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,30v30a8,8 0 1,1 -4,-7V38l20,-5v22a8,8 0 1,1 -4,-7V33z" />
+
+    <!-- Small star (events/multi-purpose) -->
+    <path
+        android:fillColor="#FACC15"
+        android:pathData="M30,70l3,6 6,1 -4.5,4.5 1,6 -5.5,-3 -5.5,3 1,-6L21,77l6,-1z" />
+
+</vector>
