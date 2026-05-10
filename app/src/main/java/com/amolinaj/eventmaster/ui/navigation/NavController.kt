@@ -1,41 +1,27 @@
 package com.amolinaj.eventmaster.ui.navigation
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavType
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.toRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.amolinaj.eventmaster.ui.screens.AddCategoryScreen
 import com.amolinaj.eventmaster.ui.screens.AddEventScreen
 import com.amolinaj.eventmaster.ui.screens.EventDetailScreen
 import com.amolinaj.eventmaster.ui.screens.HomeScreen
 import com.amolinaj.eventmaster.ui.viewmodel.EventMasterViewModel
 
-private object Destinations {
-    const val HOME = "home"
-    const val ADD_CATEGORY = "add_category"
-    const val ADD_EVENT = "add_event"
-    const val ADD_EVENT_WITH_ARG = "add_event?categoryId={categoryId}"
-    const val DETAIL = "detail/{eventId}"
-}
-
-private fun buildAddEventRoute(categoryId: Int?): String {
-    return if (categoryId == null) {
-        Destinations.ADD_EVENT
-    } else {
-        "${Destinations.ADD_EVENT}?categoryId=$categoryId"
-    }
-}
-
-@SuppressLint("DiscouragedApi")
+@RequiresApi(Build.VERSION_CODES.O)
+@SuppressLint("DiscouragedApi", "LocalContextResourcesRead")
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
-    val eventMasterViewModel = remember { EventMasterViewModel() }
+    val eventMasterViewModel: EventMasterViewModel = hiltViewModel()
     val context = LocalContext.current
 
     val resolveImageResId: (String?) -> Int = { imageResName ->
@@ -46,57 +32,42 @@ fun Navigation() {
         }
     }
 
-    NavHost(navController = navController, startDestination = Destinations.HOME) {
-        composable(Destinations.HOME) {
+    NavHost(navController = navController, startDestination = HomeRoute) {
+        composable<HomeRoute> {
             HomeScreen(
                 uiState = eventMasterViewModel.uiState,
-                onCreateCategory = { navController.navigate(Destinations.ADD_CATEGORY) },
+                onCreateCategory = { navController.navigate(AddCategoryRoute) },
                 onCreateEvent = { categoryId ->
-                    navController.navigate(buildAddEventRoute(categoryId))
+                    navController.navigate(AddEventRoute(categoryId = categoryId))
                 },
                 onOpenEventDetail = { eventId ->
-                    navController.navigate("detail/$eventId")
+                    navController.navigate(EventDetailRoute(eventId = eventId))
                 },
                 getEventsByCategory = eventMasterViewModel::getEventsByCategory,
                 resolveImageResId = resolveImageResId
             )
         }
 
-        composable(Destinations.ADD_CATEGORY) {
+        composable<AddCategoryRoute> {
             AddCategoryScreen(
                 viewModel = eventMasterViewModel,
                 onBack = { navController.popBackStack() }
             )
         }
 
-        composable(
-            route = Destinations.ADD_EVENT_WITH_ARG,
-            arguments = listOf(
-                navArgument("categoryId") {
-                    type = NavType.IntType
-                    defaultValue = -1
-                }
-            )
-        ) { backStackEntry ->
-            val categoryId = backStackEntry.arguments?.getInt("categoryId")?.takeIf { it != -1 }
+        composable<AddEventRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<AddEventRoute>()
             AddEventScreen(
                 viewModel = eventMasterViewModel,
                 categories = eventMasterViewModel.uiState.categories,
-                preselectedCategoryId = categoryId,
+                preselectedCategoryId = route.categoryId,
                 onBack = { navController.popBackStack() }
             )
         }
 
-        composable(
-            route = Destinations.DETAIL,
-            arguments = listOf(
-                navArgument("eventId") {
-                    type = NavType.IntType
-                }
-            )
-        ) { backStackEntry ->
-            val eventId = backStackEntry.arguments?.getInt("eventId") ?: return@composable
-            val event = eventMasterViewModel.getEventById(eventId)
+        composable<EventDetailRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<EventDetailRoute>()
+            val event = eventMasterViewModel.getEventById(route.eventId)
             val category = event?.categoryId?.let(eventMasterViewModel::getCategoryById)
             EventDetailScreen(
                 event = event,

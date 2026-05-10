@@ -6,26 +6,49 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.amolinaj.eventmaster.ui.model.EventCategory
-import com.amolinaj.eventmaster.ui.model.EventItem
+import androidx.lifecycle.viewModelScope
+import com.amolinaj.eventmaster.data.repository.EventRepository
 import com.amolinaj.eventmaster.ui.state.CategoryFormValidationErrors
 import com.amolinaj.eventmaster.ui.state.EventFormValidationErrors
 import com.amolinaj.eventmaster.ui.state.EventMasterUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
+import javax.inject.Inject
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
-class EventMasterViewModel : ViewModel() {
+@RequiresApi(Build.VERSION_CODES.O)
+@HiltViewModel
+class EventMasterViewModel @Inject constructor(
+    private val eventRepository: EventRepository
+) : ViewModel() {
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private val strictDateFormatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
-        .withResolverStyle(ResolverStyle.STRICT)
+    private val strictDateFormatter by lazy {
+        DateTimeFormatter.ofPattern("dd/MM/uuuu")
+            .withResolverStyle(ResolverStyle.STRICT)
+    }
 
-    var uiState by mutableStateOf(initialUiState())
+    var uiState by mutableStateOf(EventMasterUiState())
         private set
 
-    private var nextCategoryId = uiState.categories.maxOfOrNull { it.id }?.plus(1) ?: 1
-    private var nextEventId = uiState.events.maxOfOrNull { it.id }?.plus(1) ?: 1
+    init {
+        observeUiState()
+    }
+
+    private fun observeUiState() {
+        viewModelScope.launch {
+            combine(
+                eventRepository.observeCategories(),
+                eventRepository.observeEvents()
+            ) { categories, events ->
+                EventMasterUiState(categories = categories, events = events)
+            }.collect { state ->
+                uiState = state
+            }
+        }
+    }
 
     fun validateCategory(name: String, description: String): CategoryFormValidationErrors {
         val trimmedName = name.trim()
@@ -53,13 +76,12 @@ class EventMasterViewModel : ViewModel() {
         val errors = validateCategory(name = name, description = description)
         if (errors.hasErrors) return errors
 
-        val newCategory = EventCategory(
-            id = nextCategoryId++,
-            name = name.trim(),
-            description = description.trim()
-        )
-
-        uiState = uiState.copy(categories = uiState.categories + newCategory)
+        viewModelScope.launch {
+            eventRepository.insertCategory(
+                name = name.trim(),
+                description = description.trim()
+            )
+        }
         return CategoryFormValidationErrors()
     }
 
@@ -140,33 +162,31 @@ class EventMasterViewModel : ViewModel() {
 
         if (errors.hasErrors) return errors
 
-        val newEvent = EventItem(
-            id = nextEventId++,
-            categoryId = categoryId!!,
-            title = title.trim(),
-            description = description.trim(),
-            date = date.trim(),
-            location = location.trim(),
-            imageResName = imageResName.trim().takeIf { it.isNotBlank() }
-        )
-
-        uiState = uiState.copy(events = uiState.events + newEvent)
+        viewModelScope.launch {
+            eventRepository.insertEvent(
+                categoryId = categoryId!!,
+                title = title.trim(),
+                description = description.trim(),
+                date = date.trim(),
+                location = location.trim(),
+                imageResName = imageResName.trim().takeIf { it.isNotBlank() }
+            )
+        }
         return EventFormValidationErrors()
     }
 
-    fun getEventsByCategory(categoryId: Int): List<EventItem> {
+    fun getEventsByCategory(categoryId: Int): List<com.amolinaj.eventmaster.ui.model.EventItem> {
         return uiState.events.filter { it.categoryId == categoryId }
     }
 
-    fun getEventById(eventId: Int): EventItem? {
+    fun getEventById(eventId: Int): com.amolinaj.eventmaster.ui.model.EventItem? {
         return uiState.events.find { it.id == eventId }
     }
 
-    fun getCategoryById(categoryId: Int): EventCategory? {
+    fun getCategoryById(categoryId: Int): com.amolinaj.eventmaster.ui.model.EventCategory? {
         return uiState.categories.find { it.id == categoryId }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun isValidDate(value: String): Boolean {
         return try {
             LocalDate.parse(value, strictDateFormatter)
@@ -174,45 +194,5 @@ class EventMasterViewModel : ViewModel() {
         } catch (_: Exception) {
             false
         }
-    }
-
-    private fun initialUiState(): EventMasterUiState {
-        val defaultCategories = listOf(
-            EventCategory(id = 1, name = "Deportes", description = "Eventos y competencias deportivas"),
-            EventCategory(id = 2, name = "Tecnología", description = "Conferencias y meetups"),
-            EventCategory(id = 3, name = "Música", description = "Conciertos y festivales"),
-        )
-
-        val defaultEvents = listOf(
-            EventItem(
-                id = 1,
-                categoryId = 1,
-                title = "Maratón de Santiago",
-                description = "Competencia abierta para corredores amateurs y profesionales.",
-                date = "26/04/2026",
-                location = "Santiago",
-                imageResName = "event_sports"
-            ),
-            EventItem(
-                id = 2,
-                categoryId = 2,
-                title = "Congreso de Tecnología",
-                description = "Charlas técnicas con reconocidos exponentes de la tecnología.",
-                date = "28/07/2026",
-                location = "Sala de Teatro UCSC, Concepción",
-                imageResName = "event_tech"
-            ),
-            EventItem(
-                id = 3,
-                categoryId = 3,
-                title = "Festival de Prueba",
-                description = "Una noche con bandas y experiencias en vivo.",
-                date = "12/06/2026",
-                location = "Parque Bicentenario, Concepción",
-                imageResName = "event_music"
-            ),
-        )
-
-        return EventMasterUiState(categories = defaultCategories, events = defaultEvents)
     }
 }
