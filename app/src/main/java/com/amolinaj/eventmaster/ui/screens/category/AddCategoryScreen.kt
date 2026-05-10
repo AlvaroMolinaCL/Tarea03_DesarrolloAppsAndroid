@@ -1,5 +1,7 @@
 package com.amolinaj.eventmaster.ui.screens.category
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +27,7 @@ import com.amolinaj.eventmaster.ui.components.EventMasterTextField
 import com.amolinaj.eventmaster.ui.state.CategoryFormValidationErrors
 import com.amolinaj.eventmaster.ui.viewmodel.EventMasterViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCategoryScreen(

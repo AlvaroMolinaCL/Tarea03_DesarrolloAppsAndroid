@@ -34,7 +34,7 @@ import com.amolinaj.eventmaster.ui.model.EventCategory
 import com.amolinaj.eventmaster.ui.state.EventFormValidationErrors
 import com.amolinaj.eventmaster.ui.viewmodel.EventMasterViewModel
 
-@SuppressLint("DiscouragedApi")
+@SuppressLint("DiscouragedApi", "LocalContextResourcesRead")
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
