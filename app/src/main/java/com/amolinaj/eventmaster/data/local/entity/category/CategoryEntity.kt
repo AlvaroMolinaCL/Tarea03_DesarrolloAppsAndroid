@@ -1,11 +1,11 @@
-package com.amolinaj.eventmaster.data.local.entity
+package com.amolinaj.eventmaster.data.local.entity.category
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "categories")
-data class EventCategoryEntity(
+data class CategoryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     @ColumnInfo(name = "name")

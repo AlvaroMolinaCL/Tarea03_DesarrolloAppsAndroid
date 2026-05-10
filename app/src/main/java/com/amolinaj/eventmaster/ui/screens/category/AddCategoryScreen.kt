@@ -1,4 +1,4 @@
-package com.amolinaj.eventmaster.ui.screens
+package com.amolinaj.eventmaster.ui.screens.category
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

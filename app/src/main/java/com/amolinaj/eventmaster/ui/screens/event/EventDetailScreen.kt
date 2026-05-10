@@ -1,4 +1,4 @@
-package com.amolinaj.eventmaster.ui.screens
+package com.amolinaj.eventmaster.ui.screens.event
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

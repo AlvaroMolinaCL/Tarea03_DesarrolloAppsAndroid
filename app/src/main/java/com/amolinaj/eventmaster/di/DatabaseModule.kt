@@ -3,8 +3,8 @@ package com.amolinaj.eventmaster.di
 import android.content.Context
 import androidx.room.Room
 import com.amolinaj.eventmaster.data.local.EventMasterDatabase
-import com.amolinaj.eventmaster.data.local.dao.EventCategoryDao
-import com.amolinaj.eventmaster.data.local.dao.EventItemDao
+import com.amolinaj.eventmaster.data.local.dao.category.CategoryDao
+import com.amolinaj.eventmaster.data.local.dao.event.EventDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,12 +29,12 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideEventCategoryDao(database: EventMasterDatabase): EventCategoryDao {
+    fun provideEventCategoryDao(database: EventMasterDatabase): CategoryDao {
         return database.eventCategoryDao()
     }
 
     @Provides
-    fun provideEventItemDao(database: EventMasterDatabase): EventItemDao {
+    fun provideEventItemDao(database: EventMasterDatabase): EventDao {
         return database.eventItemDao()
     }
 

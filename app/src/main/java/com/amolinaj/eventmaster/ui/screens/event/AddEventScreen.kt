@@ -1,4 +1,4 @@
-package com.amolinaj.eventmaster.ui.screens
+package com.amolinaj.eventmaster.ui.screens.event
 
 import android.annotation.SuppressLint
 import android.os.Build

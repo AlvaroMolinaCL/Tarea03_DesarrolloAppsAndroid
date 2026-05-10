@@ -10,10 +10,10 @@ import androidx.navigation.toRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.amolinaj.eventmaster.ui.screens.AddCategoryScreen
-import com.amolinaj.eventmaster.ui.screens.AddEventScreen
-import com.amolinaj.eventmaster.ui.screens.EventDetailScreen
-import com.amolinaj.eventmaster.ui.screens.HomeScreen
+import com.amolinaj.eventmaster.ui.screens.category.AddCategoryScreen
+import com.amolinaj.eventmaster.ui.screens.event.AddEventScreen
+import com.amolinaj.eventmaster.ui.screens.event.EventDetailScreen
+import com.amolinaj.eventmaster.ui.screens.home.HomeScreen
 import com.amolinaj.eventmaster.ui.viewmodel.EventMasterViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)

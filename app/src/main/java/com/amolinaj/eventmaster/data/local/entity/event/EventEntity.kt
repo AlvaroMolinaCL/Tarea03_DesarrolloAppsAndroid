@@ -1,16 +1,17 @@
-package com.amolinaj.eventmaster.data.local.entity
+package com.amolinaj.eventmaster.data.local.entity.event
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.amolinaj.eventmaster.data.local.entity.category.CategoryEntity
 
 @Entity(
     tableName = "events",
     foreignKeys = [
         ForeignKey(
-            entity = EventCategoryEntity::class,
+            entity = CategoryEntity::class,
             parentColumns = ["id"],
             childColumns = ["category_id"],
             onDelete = ForeignKey.CASCADE
@@ -18,7 +19,7 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index(value = ["category_id"])]
 )
-data class EventItemEntity(
+data class EventEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     @ColumnInfo(name = "category_id")

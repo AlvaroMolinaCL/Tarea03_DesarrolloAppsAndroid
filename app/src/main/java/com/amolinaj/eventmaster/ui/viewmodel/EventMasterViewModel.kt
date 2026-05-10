@@ -7,7 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.amolinaj.eventmaster.data.repository.EventRepository
+import com.amolinaj.eventmaster.data.repository.category.CategoryRepository
+import com.amolinaj.eventmaster.data.repository.event.EventRepository
 import com.amolinaj.eventmaster.ui.state.CategoryFormValidationErrors
 import com.amolinaj.eventmaster.ui.state.EventFormValidationErrors
 import com.amolinaj.eventmaster.ui.state.EventMasterUiState
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class EventMasterViewModel @Inject constructor(
+    private val categoryRepository: CategoryRepository,
     private val eventRepository: EventRepository
 ) : ViewModel() {
 
@@ -40,8 +42,8 @@ class EventMasterViewModel @Inject constructor(
     private fun observeUiState() {
         viewModelScope.launch {
             combine(
-                eventRepository.observeCategories(),
-                eventRepository.observeEvents()
+                categoryRepository.observeAll(),
+                eventRepository.observeAll()
             ) { categories, events ->
                 EventMasterUiState(categories = categories, events = events)
             }.collect { state ->
@@ -77,7 +79,7 @@ class EventMasterViewModel @Inject constructor(
         if (errors.hasErrors) return errors
 
         viewModelScope.launch {
-            eventRepository.insertCategory(
+            categoryRepository.insert(
                 name = name.trim(),
                 description = description.trim()
             )
@@ -163,7 +165,7 @@ class EventMasterViewModel @Inject constructor(
         if (errors.hasErrors) return errors
 
         viewModelScope.launch {
-            eventRepository.insertEvent(
+            eventRepository.insert(
                 categoryId = categoryId!!,
                 title = title.trim(),
                 description = description.trim(),
